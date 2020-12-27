@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Framework;
 using OpenTK.Graphics.OpenGL;
 
 
@@ -22,6 +21,7 @@ namespace Framework
 {
     public class cFont
     {
+        public float scale;
         public int width;
         public int height;
         public int width_delta;
@@ -44,7 +44,7 @@ namespace Framework
         // #########################################################################################################
         string Characters
         {
-            get { return characters;  }
+            get { return characters; }
             set
             {
                 characters = value;
@@ -68,19 +68,50 @@ namespace Framework
         {
             width_delta = width = _w;
             height_delta = height = _h;
+            scale = 1.0f;
+        }
+
+
+        // #########################################################################################################
+        /// <summary>
+        ///     Draw text on screen
+        /// </summary>
+        /// <param name="_x">X coordinate</param>
+        /// <param name="_y">Y coordinate</param>
+        /// <param name="_text">Text to draw</param>
+        /// <param name="_colour">colour+alpha to use</param>
+        /// <param name="_ocolour">outline colour+alpha to use</param>
+        /// <param name="_scale">scale to draw at</param>
+        // #########################################################################################################
+        public void DrawOutline(float _x, float _y, string _text, UInt32 _colour = 0xffffffff, UInt32 _ocolour = 0xffffffff, float _scale = 1.0f)
+        {
+            float off = scale * _scale;
+            Draw(_x + off, _y, _text, _ocolour, _scale);
+            Draw(_x - off, _y, _text, _ocolour, _scale);
+            Draw(_x, _y + off, _text, _ocolour, _scale);
+            Draw(_x, _y - off, _text, _ocolour, _scale);
+            Draw(_x, _y, _text, _colour, _scale);
         }
 
         // #########################################################################################################
         /// <summary>
         ///     Draw text on screen
         /// </summary>
-        /// <param name="_x"></param>
-        /// <param name="_y"></param>
-        /// <param name="_text"></param>
-        /// <param name="_scale"></param>
+        /// <param name="_x">X coordinate</param>
+        /// <param name="_y">Y coordinate</param>
+        /// <param name="_text">Text to draw</param>
+        /// <param name="_colour">colour+alpha to use</param>
+        /// <param name="_scale">scale to draw at</param>
         // #########################################################################################################
-        public void Draw(float _x,float _y, string _text, float _scale = 1.0f)
+        public void Draw(float _x, float _y, string _text, UInt32 _colour = 0xffffffff, float _scale = 1.0f)
         {
+            float r = ((_colour >> 16) & 0xff) / 255.0f;
+            float g = ((_colour >> 8) & 0xff) / 255.0f;
+            float b = ((_colour >> 0) & 0xff) / 255.0f;
+            float a = ((_colour >> 24) & 0xff) / 255.0f;
+
+            _scale *= scale;
+
             Texture.Set();
             GL.Begin(PrimitiveType.Quads);
 
@@ -95,7 +126,7 @@ namespace Framework
             {
                 char c = _text[i];
                 int index = -1;
-                if( Lookup.TryGetValue(c, out index) )
+                if (Lookup.TryGetValue(c, out index))
                 {
                     int column = index % chars_per_row;
                     int row = index / chars_per_row;
@@ -108,15 +139,19 @@ namespace Framework
 
 
                     GL.TexCoord2(u1, v1);
+                    GL.Color4(r, g, b, a);
                     GL.Vertex2(xpos, ypos);
 
                     GL.TexCoord2(u2, v1);
+                    GL.Color4(r, g, b, a);
                     GL.Vertex2(xpos + dx, ypos);
 
                     GL.TexCoord2(u2, v2);
+                    GL.Color4(r, g, b, a);
                     GL.Vertex2(xpos + dx, ypos + dy);
 
                     GL.TexCoord2(u1, v2);
+                    GL.Color4(r, g, b, a);
                     GL.Vertex2(xpos, ypos + dy);
 
                     xpos += delta_dx;
@@ -135,12 +170,12 @@ namespace Framework
         /// <param name="_character_width"></param>
         /// <param name="_character_height"></param>
         // #########################################################################################################
-        public static cFont  Create(string _filename, int _character_width, int _character_height )
+        public static cFont Create(string _filename, int _character_width, int _character_height)
         {
             cFont font = new cFont(_character_width, _character_height);
             font.Texture = cTexture.Load(_filename);
 
-            font.PixelU = 1.0f/font.Texture.width;
+            font.PixelU = 1.0f / font.Texture.width;
             font.PixelV = 1.0f / font.Texture.height;
 
             font.Characters = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_£abcdefghijklmnopqrstuvwxyz{|}~©";

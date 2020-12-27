@@ -35,8 +35,8 @@ namespace Framework
         /// <summary>Main window</summary>
         public static MainWindow Window;
         static DateTime LastTime = DateTime.Now;
-        public static float[] SceneMatrix_floats = new float[ (int)eMatrixType.MAX_TYPE * 16 ];
-        public static Matrix4[] SceneMatrix = new Matrix4[ (int)eMatrixType.MAX_TYPE ];
+        public static float[] SceneMatrix_floats = new float[(int)eMatrixType.MAX_TYPE * 16];
+        public static Matrix4[] SceneMatrix = new Matrix4[(int)eMatrixType.MAX_TYPE];
 
         /// <summary>Current Projection matrix</summary>
         public static Matrix4 ProjectionMatrix;
@@ -83,7 +83,8 @@ namespace Framework
         ///     Get/Set window visibility
         /// </summary>
         // #############################################################################################
-        public static bool Visible {
+        public static bool Visible
+        {
             get
             {
                 return Window.Visible;
@@ -104,7 +105,7 @@ namespace Framework
             get
             {
                 return Window.IsExiting;
-            }            
+            }
         }
 
 
@@ -138,13 +139,14 @@ namespace Framework
             buffer[2] = Window.WinWidth;
             buffer[3] = Window.WinHeight;
 
-            byte[] filebuff = new byte[4*4];
+            byte[] filebuff = new byte[4 * 4];
             System.Buffer.BlockCopy(buffer, 0, filebuff, 0, 16);
 
             try
             {
                 File.WriteAllBytes("framework_win.dat", filebuff);
-            }catch { }
+            }
+            catch { }
 
         }
 
@@ -218,7 +220,7 @@ namespace Framework
             // Get frame delta, and check for time going "backwards" (does happen when time is synced to the internet)
             bool Ready = false;
             int mill = (int)(1000.0 / _fps);
-            while(!Ready)
+            while (!Ready)
             {
                 DateTime CurrentTime = DateTime.Now;
 
@@ -339,15 +341,16 @@ namespace Framework
         // #############################################################################################
         public static void Begin(float _fps)
         {
-            if (_fps > 0){
+            if (_fps > 0)
+            {
                 WaitForTick(_fps);
             }
 
-            float xscale = (Program.Screen_Width/(320.0f*3.0f));
+            float xscale = (Program.Screen_Width / (320.0f * 3.0f));
             float yscale = (Program.Screen_Height / (256.0f * 3.0f));
             //global.MouseX = (int) ((Window.MouseX-Window.X-Program.Screen_Left )/ xscale);
             //global.MouseY = (int) ((Window.MouseY- Window.Y - Program.Screen_Top) / yscale);
-            MouseX = (int)((Window.MouseX -  Program.Screen_Left) / xscale);
+            MouseX = (int)((Window.MouseX - Program.Screen_Left) / xscale);
             MouseY = (int)((Window.MouseY - Program.Screen_Top) / yscale);
 
             GL.Viewport(Window.ClientRectangle.X, Window.ClientRectangle.Y, Window.ClientRectangle.Width, Window.ClientRectangle.Height);
@@ -357,9 +360,9 @@ namespace Framework
             //GL.LoadMatrix(ref projection);
 
             GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();            
-            GL.Ortho(0, Window.ClientRectangle.Width-1, Window.ClientRectangle.Height-1, 0.0, 0.0, 4.0);
-          
+            GL.LoadIdentity();
+            GL.Ortho(0, Window.ClientRectangle.Width - 1, Window.ClientRectangle.Height - 1, 0.0, 0.0, 4.0);
+
             //GL.GetFloat(GetPName.ProjectionMatrix, out ProjectionMatrix);            
             //SetFloats(ref ProjectionMatrix, SceneMatrix_floats, (int)5 * 16);
 
@@ -372,8 +375,9 @@ namespace Framework
             ProjectionMatrix = CreateOrtho2(Window.ClientRectangle.Width - 1, -(Window.ClientRectangle.Height - 1), 0.0f, 10.0f);
             SetMatrix(eMatrixType.Projection, ProjectionMatrix);
 
-            SetClipRect(0, 0, (int)Program.Screen_Width, (int)Program.Screen_Height);
-            
+            ClipRects.Clear();
+            PushClipRect(0, 0, (int)Program.Screen_Width, (int)Program.Screen_Height);
+
             //Window.Run(_fps);
         }
 
@@ -481,6 +485,33 @@ namespace Framework
             GL.End();
         }
 
+        public static void DrawRect(float _x1, float _y1, float _x2, float _y2, UInt32 _col)
+        {
+            float r = ((_col >> 16) & 0xff) / 255.0f;
+            float g = ((_col >> 8) & 0xff) / 255.0f;
+            float b = ((_col >> 0) & 0xff) / 255.0f;
+            float a = ((_col >> 24) & 0xff) / 255.0f;
+            GL.Disable(EnableCap.Texture2D);
+            GL.Begin(PrimitiveType.LineStrip);
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x1, _y1);
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x2, _y1);
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x2, _y2);
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x1, _y2);
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x1, _y1);
+            GL.End();
+        }
+
+        public static void DrawORect(float _x1, float _y1, float _w, float _h, UInt32 _col, UInt32 _ocol)
+        {
+            Render.DrawRect(_x1 + 1, _y1, _x1 + _w - 2, _y1 + _h - 1, _ocol);
+            Render.DrawRect(_x1 + 2, _y1 + 1, _x1 + _w - 3, _y1 + _h - 2, _col);
+            Render.DrawRect(_x1 + 3, _y1 + 2, _x1 + _w - 4, _y1 + _h - 3, _ocol);
+        }
 
         #region CLIP RECTS
         // #####################################################################################################################
@@ -494,7 +525,13 @@ namespace Framework
         // #####################################################################################################################
         public static void SetClipRect(float _x, float _y, float _w, float _h)
         {
-            GL.Scissor((int)_x, (int)_y, (int)_w, (int)_h);
+            int y1, y2;
+
+            // Clip rects are from bottom left, so we need to flip it
+            y1 = (Window.Height - ((int)_h + (int)_y));
+            y2 = y1 - (int)_h;
+
+            GL.Scissor((int)_x, y1, (int)_w, (int)_h);
         }
 
         // #####################################################################################################################
@@ -506,7 +543,7 @@ namespace Framework
         /// <param name="_w">width in pixels</param>
         /// <param name="_h">height in pixels</param>
         // #####################################################################################################################
-        public static void PushClipRect(float _x,float _y, float _w, float _h)
+        public static void PushClipRect(float _x, float _y, float _w, float _h)
         {
             float[] arr = new float[4];
             GL.GetFloat(GetPName.ScissorBox, arr);
@@ -525,21 +562,10 @@ namespace Framework
             if (ClipRects.Count > 0)
             {
                 float[] rect = ClipRects.Pop();
-                SetClipRect(rect[0], rect[1], rect[2], rect[3]);
+                GL.Scissor((int)rect[0], (int)rect[1], (int)rect[2], (int)rect[3]);
             }
         }
         #endregion 
-
-        /// <summary>
-        ///     Draw text to the screen
-        /// </summary>
-        /// <param name="_x"></param>
-        /// <param name="_y"></param>
-        /// <param name="text"></param>
-        public static void DrawText(float _x, float _y, string text)
-        {
-            
-        }
 
     }
 }

@@ -64,8 +64,8 @@ namespace Framework
         // #############################################################################################
         public void render()
         {
-            Font.Draw(100, 100, "HELLO WORLD",3);
-            Font.Draw(100, 150, "Hello World £123,456", 3);
+            Font.Draw(100, 100, "HELLO WORLD", 0xffffffff, 3);
+            Font.Draw(100, 150, "Hello World £123,456", 0xffffffff, 3);
         }
     }
 }
