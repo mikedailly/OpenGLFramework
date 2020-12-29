@@ -485,6 +485,42 @@ namespace Framework
             GL.End();
         }
 
+
+        // ########################################################################################
+        /// <summary>
+        ///     Draw a filled rectangle
+        /// </summary>
+        /// <param name="_x1">left</param>
+        /// <param name="_y1">top</param>
+        /// <param name="_x2">right</param>
+        /// <param name="_y2">bottom</param>
+        /// <param name="_col">the colour to fill with</param>
+        // ########################################################################################
+        public static void FillRect(float _x1, float _y1, float _x2, float _y2, UInt32 _col)
+        {
+            float r = ((_col >> 16) & 0xff) / 255.0f;
+            float g = ((_col >> 8) & 0xff) / 255.0f;
+            float b = ((_col >> 0) & 0xff) / 255.0f;
+            float a = ((_col >> 24) & 0xff) / 255.0f;
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Begin(PrimitiveType.Quads);
+
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x1, _y1);
+
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x2, _y1);
+
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x2, _y2);
+
+            GL.Color4(r, g, b, a);
+            GL.Vertex2(_x1, _y2);
+
+            GL.End();
+        }
+
         public static void DrawRect(float _x1, float _y1, float _x2, float _y2, UInt32 _col)
         {
             float r = ((_col >> 16) & 0xff) / 255.0f;

@@ -74,6 +74,33 @@ namespace Framework
 
         // #########################################################################################################
         /// <summary>
+        ///     Get the width of a string
+        /// </summary>
+        /// <param name="_text">the text to get the width of</param>
+        /// <returns>
+        ///     Width of the text in pixels
+        /// </returns>
+        // #########################################################################################################
+        public int StringWidth(string _text)
+        {
+            return (int)(_text.Length * width_delta * scale);
+        }
+        // #########################################################################################################
+        /// <summary>
+        ///     Get the width of a string
+        /// </summary>
+        /// <param name="_text">the text to get the width of</param>
+        /// <returns>
+        ///     Width of the text in pixels
+        /// </returns>
+        // #########################################################################################################
+        public int StringHeight(string _text)
+        {
+            return (int)(height_delta * scale);
+        }
+
+        // #########################################################################################################
+        /// <summary>
         ///     Draw text on screen
         /// </summary>
         /// <param name="_x">X coordinate</param>
@@ -102,7 +129,7 @@ namespace Framework
         /// <param name="_text">Text to draw</param>
         /// <param name="_colour">colour+alpha to use</param>
         /// <param name="_scale">scale to draw at</param>
-        // #########################################################################################################
+            // #########################################################################################################
         public void Draw(float _x, float _y, string _text, UInt32 _colour = 0xffffffff, float _scale = 1.0f)
         {
             float r = ((_colour >> 16) & 0xff) / 255.0f;

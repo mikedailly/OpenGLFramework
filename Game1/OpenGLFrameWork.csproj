@@ -76,7 +76,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Game\Game.cs" />
+    <Compile Include="Utils\FileBuffer.cs" />
     <Compile Include="Utils\FileSystem.cs" />
+    <Compile Include="_Engine\ButtonManager.cs" />
+    <Compile Include="_Engine\cButton.cs" />
     <Compile Include="_Engine\cFont.cs" />
     <Compile Include="_Engine\cImage.cs" />
     <Compile Include="_Engine\cShader.cs" />
