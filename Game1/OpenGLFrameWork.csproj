@@ -84,6 +84,7 @@
     <Compile Include="_Engine\cImage.cs" />
     <Compile Include="_Engine\cShader.cs" />
     <Compile Include="_Engine\cUtils.cs" />
+    <Compile Include="_Engine\Draw.cs" />
     <Compile Include="_Engine\ShaderManager.cs" />
     <Compile Include="Utils\HTTP.cs" />
     <Compile Include="Utils\Log.cs" />
@@ -117,6 +118,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="graphics\BallSprite.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="ZXFont.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
