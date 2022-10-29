@@ -75,6 +75,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="_Engine\cMatrix.cs" />
+    <Compile Include="_Engine\cMatrixStack.cs" />
     <Compile Include="Game\Game.cs" />
     <Compile Include="Utils\FileBuffer.cs" />
     <Compile Include="Utils\FileSystem.cs" />
